@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import CatalogRoute from '../catalog-route/catalog-route';
+import CatalogCategoryRoute from '../catalog-category-route/catalog-category-route';
+import CartRoute from '../cart-route/cart-route';
 import { Route, Switch } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -9,8 +11,9 @@ import Box from 'grommet/components/Box';
 import Menu from 'grommet/components/Menu';
 import Button from 'grommet/components/Button';
 import Anchor from 'grommet/components/Anchor';
-import Actions from 'grommet/components/icons/base/Actions';
+import User from 'grommet/components/icons/base/User';
 import Cart from 'grommet/components/icons/base/Cart';
+import * as fromProduct from '../../api/product';
 
 const Layout = styled.div`
   display: flex;
@@ -38,15 +41,27 @@ const Footer = styled.footer`
 `;
 
 class App extends Component {
+  state = {
+    categories: [],
+    cart: []
+  };
   render() {
+    const { categories, cart } = this.state;
+
+    console.log(categories);
     return (
       <BrowserRouter>
         <Layout>
           <HeaderHolder>
             <Header fixed={false} float={false} splash={false}>
-              <Title>Welcome to RTFMarket</Title>
+              <Title>RTFMarket</Title>
 
-              <Box flex={true} justify="end" direction="row" responsive={false}>
+              <Box
+                flex={true}
+                justify="start"
+                direction="row"
+                responsive={false}
+              >
                 <Menu
                   responsive={true}
                   inline={true}
@@ -55,15 +70,19 @@ class App extends Component {
                   direction="row"
                   size="medium"
                 >
-                  <Anchor href="#" className="active">
-                    Catalog
-                  </Anchor>
-                  <Anchor href="#">Home</Anchor>
-                  <Anchor href="#">Ordering</Anchor>
+                  {categories.length &&
+                    categories.map(item => (
+                      <Anchor path={`/catalog/${item.id}`}>{item.title}</Anchor>
+                    ))}
                 </Menu>
               </Box>
 
-              <Box flex={true} justify="end" direction="row" responsive={false}>
+              <Box
+                flex="shrink"
+                justify="end"
+                direction="row"
+                responsive={false}
+              >
                 <Button
                   icon={<Cart />}
                   plain={true}
@@ -71,12 +90,11 @@ class App extends Component {
                   accent={false}
                   primary={false}
                 />
-                <Menu icon={<Actions />} dropAlign={{ right: 'right' }}>
-                  <Anchor href="#" className="active">
-                    First
-                  </Anchor>
-                  <Anchor href="#">Second</Anchor>
-                  <Anchor href="#">Third</Anchor>
+                <Menu icon={<User />} dropAlign={{ right: 'right' }}>
+                  <Anchor path="/profile">Profile</Anchor>
+                  <Anchor path="/profile">Logout</Anchor>
+                  <Anchor path="/signin">Sign In</Anchor>
+                  <Anchor path="/signup">Sign Up</Anchor>
                 </Menu>
               </Box>
             </Header>
@@ -84,8 +102,36 @@ class App extends Component {
 
           <Content>
             <Switch>
-              <Route path="/catalog" exact component={CatalogRoute} />
-              <Route path="/catalog/{slug}" exact component={CatalogRoute} />
+              <Route
+                path="/catalog/"
+                exact
+                render={props => (
+                  <CatalogRoute {...props} addToCart={this.addToCart} />
+                )}
+              />
+              <Route
+                path="/catalog/:id/"
+                exact
+                render={props => (
+                  <CatalogCategoryRoute
+                    {...props}
+                    addToCart={this.addToCart}
+                    categories={categories}
+                  />
+                )}
+              />
+              <Route
+                path="/cart/"
+                exact
+                render={props => (
+                  <CartRoute
+                    {...props}
+                    cart={cart}
+                    clearCart={this.clearCart}
+                    checkout={this.checkout}
+                  />
+                )}
+              />
 
               {/* <Route path="/cart" exact component={} /> */}
               {/* <Route path="/ordering" exact component={} /> */}
@@ -99,6 +145,38 @@ class App extends Component {
       </BrowserRouter>
     );
   }
+
+  componentDidMount() {
+    this.fetchCategories();
+  }
+
+  fetchCategories() {
+    fromProduct.GetCategories().then(response => {
+      this.setCategories(response.data);
+    });
+  }
+
+  setCategories = categories => {
+    this.setState({
+      categories
+    });
+  };
+
+  addToCart = product => {
+    console.log(this.state);
+
+    this.setState(state => ({
+      cart: [...state.cart, product]
+    }));
+  };
+
+  clearCart = () => {
+    this.setState({
+      cart: []
+    });
+  };
+
+  checkout = () => {};
 }
 
 export default App;

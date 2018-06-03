@@ -11,22 +11,23 @@ const Block = styled.div`
 
 class ProductPreview extends Component {
   render() {
+    const { product, onAddToCart } = this.props;
     return (
       <Block>
         <Card
-          contentPad="small"
-          description="sooooooo"
-          heading="Product 1"
-          label="category"
+          contentPad="medium"
+          description={product.description.substr(0, 250) + '...'}
+          heading={product.title}
           link={
             <Anchor
               icon={<LinkNext />}
-              label="Show full"
+              label="Add to cart"
               primary={true}
-              path="/"
+              onClick={() => onAddToCart(product)}
             />
           }
-          thumbnail=""
+          label={`${product.price} UAH`}
+          thumbnail={product.media.main}
         />
       </Block>
     );

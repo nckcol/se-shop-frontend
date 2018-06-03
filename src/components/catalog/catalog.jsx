@@ -1,55 +1,40 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import * as fromProduct from '../../api/product';
 import ProductPreview from '../product-preview/product-preview';
 import Box from 'grommet/components/Box';
 import Tiles from 'grommet/components/Tiles';
 import Tile from 'grommet/components/Tile';
+import Section from 'grommet/components/Section';
+import Heading from 'grommet/components/Heading';
 
 const Block = styled.div``;
 
 class Catalog extends Component {
   render() {
+    const { category, addToCart } = this.props;
+
     return (
       <Block>
-        <Box pad="medium" colorIndex="light-2">
-          Show me your categories
-          <Tiles fill={true} flush={false} size="small">
-            <Tile>
-              <ProductPreview />
-            </Tile>
-            <Tile>
-              <ProductPreview />
-            </Tile>
-            <Tile>
-              <ProductPreview />
-            </Tile>
-            <Tile>
-              <ProductPreview />
-            </Tile>
-            <Tile>
-              <ProductPreview />
-            </Tile>
-          </Tiles>
-        </Box>
+        {category ? (
+          <Section>
+            <Heading>{category.title}</Heading>
+            <Box pad="medium" colorIndex="light-2">
+              <Tiles fill={true} flush={false} size="small">
+                {category.products.map(product => (
+                  <Tile>
+                    <ProductPreview product={product} onAddToCart={addToCart} />
+                  </Tile>
+                ))}
+              </Tiles>
+            </Box>
+          </Section>
+        ) : (
+          <Section>
+            <Heading>Choose some category</Heading>
+          </Section>
+        )}
       </Block>
     );
-  }
-
-  componentDidMount() {
-    this.fetchCategories();
-  }
-
-  fetchCategories() {
-    fromProduct.GetCategories().then(data => {
-      console.log(data);
-    });
-  }
-
-  setCategories(categories) {
-    this.setState({
-      categories
-    });
   }
 }
 
